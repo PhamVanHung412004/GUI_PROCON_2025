@@ -1,0 +1,3068 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Procon 2025 - Matrix Rotation Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .upload-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 2px dashed #dee2e6;
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover {
+            border-color: #4facfe;
+            background: #f0f8ff;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-button {
+            display: block;
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-input-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .solution-controls {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #dee2e6;
+        }
+
+        .ops-list {
+            max-height: 220px;
+            overflow-y: auto;
+            background: #ffffff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        .op-item {
+            padding: 8px 10px;
+            border-bottom: 1px dashed #eee;
+            font-family: monospace;
+        }
+
+        .op-item.active {
+            background: #fff3cd;
+            border-left: 4px solid #ffca2c;
+            font-weight: bold;
+        }
+
+        .player-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .speed-select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            background: #fff;
+        }
+
+        .timeline-container {
+            margin-top: 15px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            display: none;
+            border: 1px solid #dee2e6;
+        }
+
+        .timeline-container.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .timeline-header h4 {
+            color: #495057;
+            margin: 0;
+            font-size: 1.1em;
+        }
+
+        .timeline-info {
+            font-size: 0.95em;
+            color: #6c757d;
+            font-weight: 600;
+            background: #fff;
+            padding: 6px 12px;
+            border-radius: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .timeline-slider-container {
+            position: relative;
+            padding: 10px 0;
+        }
+
+        .timeline-track {
+            position: relative;
+            height: 8px;
+            background: #dee2e6;
+            border-radius: 4px;
+            margin: 10px 0;
+            cursor: grab;
+            transition: background 0.2s ease;
+        }
+
+        .timeline-track:hover {
+            background: #ced4da;
+        }
+
+        .timeline-track:active {
+            cursor: grabbing;
+        }
+
+        .timeline-progress {
+            position: absolute;
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+            pointer-events: none;
+            transition: width 0.1s ease;
+        }
+
+        .timeline-step-markers {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            padding: 0 2px;
+        }
+
+        .timeline-step-markers span {
+            font-size: 0.75em;
+            color: #6c757d;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .timeline-step-markers span:hover {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .timeline-hint kbd {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+            padding: 1px 5px;
+            font-family: monospace;
+            font-size: 0.9em;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .timeline-current-step {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            box-shadow: 0 2px 6px rgba(102, 126, 234, 0.4);
+            cursor: grab;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .timeline-current-step:hover {
+            transform: translate(-50%, -50%) scale(1.2);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+        }
+
+        .timeline-current-step:active {
+            cursor: grabbing;
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        .timeline-slider {
+            display: none;
+            /* Ẩn slider gốc, dùng custom timeline thay thế */
+        }
+
+        .file-info {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e9ecef;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .file-path-display {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.9em;
+            color: #495057;
+            border-left: 3px solid #007bff;
+        }
+
+        .recent-files {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 8px;
+            border: 1px solid #bbdefb;
+        }
+
+        .recent-files h4 {
+            margin-bottom: 10px;
+            color: #1976d2;
+            font-size: 1em;
+        }
+
+        .recent-file-item {
+            padding: 8px 12px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid #e0e0e0;
+        }
+
+        .recent-file-item:hover {
+            background: #f5f5f5;
+            border-color: #1976d2;
+            transform: translateX(5px);
+        }
+
+        .recent-file-item .file-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .recent-file-item .file-path {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .submatrix-controls {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(103, 58, 183, 0.15);
+            box-shadow: 0 18px 35px rgba(15, 23, 42, 0.08);
+        }
+
+        .selection-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+
+        .selection-header h3 {
+            color: #1f2c46;
+            margin-bottom: 6px;
+        }
+
+        .selection-header p {
+            color: #6c757d;
+            font-size: 0.95em;
+        }
+
+        .selection-status {
+            padding: 6px 16px;
+            border-radius: 999px;
+            font-size: 0.85em;
+            font-weight: 600;
+            background: #eef2ff;
+            color: #4c6ef5;
+        }
+
+        .selection-status.manual {
+            background: #eef2ff;
+            color: #4c6ef5;
+        }
+
+        .selection-status.click {
+            background: #e6fffb;
+            color: #0d9488;
+        }
+
+        .selection-mode {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            border-radius: 999px;
+            background: #f3f4ff;
+            padding: 4px;
+            gap: 4px;
+            margin: 0 auto 20px;
+            width: fit-content;
+        }
+
+        .mode-button {
+            padding: 10px 20px;
+            border-radius: 999px;
+            border: none;
+            background: transparent;
+            color: #5a6175;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 140px;
+        }
+
+        .mode-button.active {
+            background: #4c6ef5;
+            color: #ffffff;
+            box-shadow: 0 8px 20px rgba(76, 110, 245, 0.35);
+        }
+
+        .mode-button:hover {
+            color: #1f2c46;
+        }
+
+        .selection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        .selection-card {
+            background: #fdfcff;
+            border: 1px solid #e4e7fb;
+            border-radius: 14px;
+            padding: 16px 18px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .selection-card.summary-card {
+            background: linear-gradient(135deg, rgba(76, 110, 245, 0.1), rgba(1, 186, 239, 0.12));
+            border: 1px solid rgba(76, 110, 245, 0.3);
+        }
+
+        .card-title {
+            font-weight: 600;
+            color: #334155;
+            font-size: 1.05em;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .input-row {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .input-label {
+            font-size: 0.8em;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #7d89b1;
+        }
+
+        .input-with-stepper {
+            display: flex;
+            align-items: center;
+            border: 1px solid #dfe4ff;
+            border-radius: 12px;
+            padding: 0 6px;
+            background: #ffffff;
+        }
+
+        .input-with-stepper input {
+            border: none;
+            background: transparent;
+            text-align: center;
+            width: 100%;
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #1f2c46;
+            padding: 8px 0;
+        }
+
+        .input-with-stepper input:focus {
+            outline: none;
+        }
+
+        .stepper-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 50%;
+            background: #edf0ff;
+            color: #4c6ef5;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .stepper-btn:hover {
+            background: #4c6ef5;
+            color: #ffffff;
+        }
+
+        .selection-summary {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .summary-chip {
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 12px;
+            padding: 10px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .summary-chip span {
+            font-size: 0.78em;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #7d89b1;
+        }
+
+        .summary-chip strong {
+            font-size: 1.3em;
+            color: #1f2c46;
+        }
+
+        .summary-footer {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 4px;
+            color: #374151;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #d1d5db;
+        }
+
+        .status-dot.draft {
+            background: #f59f00;
+        }
+
+        .status-dot.active {
+            background: #2fb344;
+        }
+
+        .status-dot.auto {
+            background: #15aabf;
+        }
+
+        .selection-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .selection-note {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+
+        .control-button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .control-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .control-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .matrix-container {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+            overflow-y: auto;
+            max-width: 100%;
+            position: relative;
+        }
+
+        /* Custom scrollbar for matrix container */
+        .matrix-container::-webkit-scrollbar {
+            width: 12px;
+            height: 12px;
+        }
+
+        .matrix-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 6px;
+        }
+
+        .matrix-container::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 6px;
+            border: 2px solid #f1f1f1;
+        }
+
+        .matrix-container::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
+        }
+
+        .matrix-container::-webkit-scrollbar-corner {
+            background: #f1f1f1;
+        }
+
+        .matrix-title {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            color: #333;
+        }
+
+        .matrix {
+            display: inline-block;
+            border: 2px solid #333;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 0 auto;
+            display: table;
+        }
+
+        .matrix-row {
+            display: table-row;
+        }
+
+        .matrix-cell {
+            display: table-cell;
+            width: 50px;
+            height: 50px;
+            border: 1px solid #ddd;
+            text-align: center;
+            vertical-align: middle;
+            font-weight: bold;
+            font-size: 1.1em;
+            background: white;
+            transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+            position: relative;
+        }
+
+        .matrix-cell:hover {
+            transform: scale(1.1);
+            z-index: 10;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .matrix-cell.pair-matched:hover,
+        .matrix-cell.pair-unmatched:hover {
+            transform: scale(1.05);
+        }
+
+        .matrix-cell.highlight {
+            background: #ffeb3b;
+            animation: pulse 1s infinite;
+        }
+
+        .matrix-cell.pair-unmatched {
+            background: #f87171;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .matrix-cell.pair-matched {
+            background: #34d399;
+            color: #062c1c;
+            font-weight: 700;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes rotationStep {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(90deg);
+            }
+        }
+
+        /* ========== Timeline Rotation Animation ========== */
+        /* Viền vàng nhấp nháy khi xoay */
+        .timeline-rotating {
+            animation: timelineRotatePulse 0.6s ease-in-out infinite;
+        }
+
+        @keyframes timelineRotatePulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7);
+            }
+
+            50% {
+                box-shadow: 0 0 0 10px rgba(255, 193, 7, 0.3), 0 0 20px 5px rgba(255, 193, 7, 0.5);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7);
+            }
+        }
+
+        /* Timeline thumb rotation animation */
+        .timeline-thumb-rotating {
+            animation: thumbRotate 0.6s linear infinite;
+        }
+
+        @keyframes thumbRotate {
+            from {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+
+            to {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        /* Progress bar glow when rotating */
+        .timeline-progress-rotating {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #ffc107 100%);
+            background-size: 200% 100%;
+            animation: progressGlow 1s linear infinite;
+        }
+
+        @keyframes progressGlow {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            100% {
+                background-position: 200% 50%;
+            }
+        }
+
+        /* Step marker active state */
+        .step-marker-active {
+            color: #ffc107 !important;
+            font-weight: bold;
+            transform: scale(1.3);
+            transition: transform 0.2s ease;
+        }
+
+        /* Timeline container highlight during rotation */
+        .timeline-container.rotating {
+            border: 2px solid #ffc107;
+            box-shadow: 0 0 15px rgba(255, 193, 7, 0.3);
+        }
+
+        .matrix-cell.rotating-step {
+            animation: rotationStep 0.4s ease-in-out;
+            z-index: 10;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Smooth rotation indicator for selected area */
+        .matrix-cell.rotating-glow {
+            animation: smoothGlow 0.4s ease-in-out;
+            z-index: 10;
+        }
+
+        @keyframes smoothGlow {
+            0% {
+                box-shadow: 0 0 0 0 rgba(76, 110, 245, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 20px 5px rgba(76, 110, 245, 0.6);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(76, 110, 245, 0);
+            }
+        }
+
+        /* Viền ngoài liền mạch bao quanh vùng chọn - Sạch sẽ */
+        #matrix {
+            position: relative;
+        }
+
+        .selection-outline {
+            position: absolute;
+            outline: 3px solid #0044cc;
+            box-shadow: 0 0 15px #0044cc, 0 0 5px #fff;
+            pointer-events: none;
+            z-index: 100;
+            overflow: hidden;
+            background: transparent;
+            isolation: isolate;
+            /* Đảm bảo không bị ảnh hưởng bởi transform của cells */
+        }
+
+        @keyframes selectionScale {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.08);
+            }
+
+            100% {
+                transform: scale(1.05);
+            }
+        }
+
+        /* Rotating animation for cells being rotated */
+        .matrix-cell.rotating {
+            animation: cellRotation 0.4s ease-in-out;
+            z-index: 10;
+        }
+
+        @keyframes cellRotation {
+            0% {
+                transform: rotate(0deg) scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7);
+            }
+
+            25% {
+                transform: rotate(-15deg) scale(0.95);
+                box-shadow: 0 0 15px 5px rgba(255, 193, 7, 0.5);
+            }
+
+            50% {
+                transform: rotate(15deg) scale(1.02);
+                box-shadow: 0 0 25px 10px rgba(255, 193, 7, 0.8);
+            }
+
+            75% {
+                transform: rotate(-8deg) scale(1.01);
+                box-shadow: 0 0 20px 8px rgba(255, 193, 7, 0.6);
+            }
+
+            100% {
+                transform: rotate(0deg) scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
+            }
+        }
+
+        /* Ripple effect when rotation starts */
+        .matrix-cell.rotating-ripple {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .matrix-cell.rotating-ripple::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255, 193, 7, 0.6) 0%, transparent 70%);
+            transform: translate(-50%, -50%) scale(0);
+            animation: rippleEffect 0.6s ease-out;
+        }
+
+        @keyframes rippleEffect {
+            to {
+                transform: translate(-50%, -50%) scale(2);
+                opacity: 0;
+            }
+        }
+
+        /* Dim non-selected cells during rotation */
+        .matrix.dimmed .matrix-cell:not(.selected):not(.selection-border) {
+            opacity: 0.25;
+            filter: blur(1px) grayscale(40%);
+            transition: opacity 0.2s ease, filter 0.2s ease;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .stat-card p {
+            opacity: 0.9;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #c62828;
+        }
+
+        .success {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #2e7d32;
+        }
+
+        /* Button rotation animation */
+        .control-button.rotating {
+            animation: buttonRotate 0.4s ease-in-out;
+        }
+
+        @keyframes buttonRotate {
+            0% {
+                transform: rotate(0deg) scale(1);
+            }
+
+            25% {
+                transform: rotate(-10deg) scale(0.95);
+            }
+
+            50% {
+                transform: rotate(10deg) scale(1);
+            }
+
+            75% {
+                transform: rotate(-5deg) scale(1);
+            }
+
+            100% {
+                transform: rotate(0deg) scale(1);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 20px;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .control-button {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .matrix-cell {
+                width: 40px;
+                height: 40px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔄 Procon 2025 Matrix Tool</h1>
+            <p>Tải đầu vào và xoay ma trận một cách trực quan</p>
+        </div>
+
+        <div class="main-content">
+            <div class="upload-section">
+                <div class="file-input-wrapper">
+                    <input type="file" id="fileInput" class="file-input" accept=".json" />
+                    <button class="file-input-button">
+                        📁 Chọn file JSON để tải đầu vào
+                    </button>
+                </div>
+                <div class="file-info" id="fileInfo"></div>
+                <div class="file-path-display" id="filePathDisplay" style="display: none;"></div>
+                <div class="recent-files" id="recentFiles" style="display: none;">
+                    <h4>📁 File gần đây</h4>
+                    <div id="recentFilesList"></div>
+                </div>
+            </div>
+
+            <div class="solution-controls" id="solutionControls" style="display: none;">
+                <div class="file-input-wrapper" style="margin-bottom: 10px;">
+                    <input type="file" id="solutionInput" class="file-input" accept=".json" />
+                    <button class="file-input-button"
+                        style="background: linear-gradient(135deg, #20bf55 0%, #01baef 100%);">
+                        🧩 Chọn file JSON lời giải (ops)
+                    </button>
+                </div>
+
+                <div class="player-controls">
+                    <button class="control-button" id="btnPlay" onclick="playSolution()"
+                        style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">▶️ Play</button>
+                    <button class="control-button" id="btnPause" onclick="pauseSolution()"
+                        style="background: linear-gradient(135deg, #ffc107 0%, #ffcd39 100%);">⏸️ Pause</button>
+                    <button class="control-button" id="btnStep" onclick="stepSolution()"
+                        style="background: linear-gradient(135deg, #17a2b8 0%, #0dcaf0 100%);">⏭️ Step</button>
+                    <button class="control-button" id="btnStop" onclick="stopSolution()"
+                        style="background: linear-gradient(135deg, #dc3545 0%, #ff6b6b 100%);">⏹️ Stop</button>
+                    <select id="speedSelect" class="speed-select" onchange="updateSpeed()">
+                        <option value="1200">Chậm</option>
+                        <option value="800" selected>Vừa</option>
+                        <option value="400">Nhanh</option>
+                    </select>
+                </div>
+
+                <div class="ops-list" id="opsList" style="display: none;"></div>
+
+                <!-- Timeline Slider - Kéo để xem lại quá trình xoay -->
+                <div class="timeline-container" id="timelineContainer">
+                    <div class="timeline-header">
+                        <h4>📊 Timeline - Kéo để xem lại các bước xoay</h4>
+                        <span class="timeline-info" id="timelineInfo">Bước: 0 / 0</span>
+                    </div>
+                    <div class="timeline-slider-container">
+                        <div class="timeline-track" id="timelineTrack">
+                            <div class="timeline-progress" id="timelineProgress" style="width: 0%"></div>
+                            <div class="timeline-current-step" id="timelineThumb" style="left: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="timeline-step-markers">
+                        <span onclick="jumpToStep(0)">▶️ Bắt đầu</span>
+                        <span id="step1">|</span>
+                        <span id="step2">|</span>
+                        <span id="step3">|</span>
+                        <span id="step4">|</span>
+                        <span onclick="jumpToStep(solutionOps.length)">🏁 Cuối</span>
+                    </div>
+                    <input type="range" class="timeline-slider" id="timelineSlider" min="0" max="0" value="0"
+                        style="display: none;">
+                </div>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Đang xử lý...</p>
+            </div>
+
+            <div class="controls" id="controls" style="display: none;">
+                <button class="control-button" onclick="rotateSubMatrix(90)">↻ Xoay 90°</button>
+                <button class="control-button" onclick="resetMatrix()">🔄 Reset</button>
+                <button class="control-button" onclick="highlightNumbers()">🎯 Highlight Numbers</button>
+                <button class="control-button" onclick="colorCodePairs()">🌈 Color Pairs</button>
+            </div>
+
+            <div class="matrix-container" id="matrixContainer" style="display: none;">
+                <div class="matrix-title">Ma trận hiện tại</div>
+                <div class="matrix" id="matrix"></div>
+                <div style="text-align: center; margin-top: 10px; font-size: 0.85em; color: #6c757d;">
+                    💡 Kéo chuột trên vùng trống để cuộn | Sử dụng thanh timeline bên dưới để xem lại quá trình
+                </div>
+            </div>
+
+            <div class="submatrix-controls" id="submatrixControls" style="display: none;">
+                <div class="selection-header">
+                    <div>
+                        <h3>🎯 Chọn vùng xoay</h3>
+                        <p>Tinh chỉnh kích thước và vị trí để xem trước nhóm ô sẽ bị ảnh hưởng.</p>
+                    </div>
+                    <span class="selection-status manual" id="selectionStatusPill">Nhập thủ công</span>
+                </div>
+
+                <div class="selection-mode" role="group" aria-label="Chế độ chọn">
+                    <button type="button" class="mode-button active" id="manualMode"
+                        onclick="setSelectionMode('manual')">Nhập thủ công</button>
+                    <button type="button" class="mode-button" id="clickMode" onclick="setSelectionMode('click')">Click
+                        để chọn</button>
+                </div>
+
+                <div class="selection-grid">
+                    <div class="selection-card">
+                        <p class="card-title">⚖️ Kích thước vùng</p>
+                        <div class="input-row">
+                            <span class="input-label">Chiều rộng</span>
+                            <div class="input-with-stepper">
+                                <button type="button" class="stepper-btn"
+                                    onclick="stepSelection('subWidth', -1)">-</button>
+                                <input type="number" id="subWidth" min="1" max="12" value="3"
+                                    oninput="refreshSelectionPreview()">
+                                <button type="button" class="stepper-btn"
+                                    onclick="stepSelection('subWidth', 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="input-row">
+                            <span class="input-label">Chiều cao</span>
+                            <div class="input-with-stepper">
+                                <button type="button" class="stepper-btn"
+                                    onclick="stepSelection('subHeight', -1)">-</button>
+                                <input type="number" id="subHeight" min="1" max="12" value="3"
+                                    oninput="refreshSelectionPreview()">
+                                <button type="button" class="stepper-btn"
+                                    onclick="stepSelection('subHeight', 1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="selection-card">
+                        <p class="card-title">📍 Vị trí bắt đầu</p>
+                        <div class="input-row">
+                            <span class="input-label">X (cột)</span>
+                            <div class="input-with-stepper">
+                                <button type="button" class="stepper-btn" onclick="stepSelection('subX', -1)">-</button>
+                                <input type="number" id="subX" min="0" max="11" value="0"
+                                    oninput="refreshSelectionPreview()">
+                                <button type="button" class="stepper-btn" onclick="stepSelection('subX', 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="input-row">
+                            <span class="input-label">Y (hàng)</span>
+                            <div class="input-with-stepper">
+                                <button type="button" class="stepper-btn" onclick="stepSelection('subY', -1)">-</button>
+                                <input type="number" id="subY" min="0" max="11" value="0"
+                                    oninput="refreshSelectionPreview()">
+                                <button type="button" class="stepper-btn" onclick="stepSelection('subY', 1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="selection-card summary-card">
+                        <p class="card-title">👀 Tóm tắt vùng chọn</p>
+                        <div class="selection-summary" id="selectionSummary">
+                            <div class="summary-chip">
+                                <span>Kích thước</span>
+                                <strong>— × —</strong>
+                            </div>
+                            <div class="summary-chip">
+                                <span>Góc trên bên trái</span>
+                                <strong>(—, —)</strong>
+                            </div>
+                            <div class="summary-footer">
+                                <span class="status-dot draft"></span>
+                                <span>Chưa áp dụng</span>
+                            </div>
+                        </div>
+                        <p class="selection-note">Mẹo: chuyển sang chế độ click để quét nhanh ngay trên ma trận.</p>
+                    </div>
+                </div>
+
+                <div class="selection-actions">
+                    <button class="control-button" onclick="updateSelection()"
+                        style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">📍 Cập nhật vùng
+                        chọn</button>
+                    <button class="control-button" onclick="clearSelectionHighlight()"
+                        style="background: linear-gradient(135deg, #6c757d 0%, #495057 100%);">🗑️ Xóa chọn</button>
+                </div>
+            </div>
+
+            <div class="stats" id="stats" style="display: none;">
+                <div class="stat-card">
+                    <h3 id="matrixSize">-</h3>
+                    <p>Kích thước ma trận</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="totalNumbers">-</h3>
+                    <p>Tổng số phần tử</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="uniqueNumbers">-</h3>
+                    <p>Số lượng số duy nhất</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="rotationCount">0</h3>
+                    <p>Số lần xoay</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="progressPercent">0%</h3>
+                    <p>Tiến độ giải bài</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="solvedCells">0</h3>
+                    <p>Số ô đã giải</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentMatrix = [];
+        let originalMatrix = [];
+        let rotationCount = 0;
+        let highlightMode = false;
+        let selectionMode = 'manual'; // 'manual' or 'click'
+        let selectedArea = {
+            x: 0,
+            y: 0,
+            width: 3,
+            height: 3
+        };
+        let isSelecting = false;
+        let selectionStart = null;
+        // Solution player state
+        let solutionOps = [];
+        let currentOpIndex = 0;
+        let isPlaying = false;
+        let playTimer = null;
+        let playSpeedMs = 800;
+        // Color coding state
+        let colorMode = false;
+        // Recent files state
+        let recentFiles = [];
+        // Debounce/throttle state for rapid key presses
+        let isStepping = false;
+        let stepDebounceTimer = null;
+
+        // Load recent files from localStorage
+        function loadRecentFiles() {
+            const saved = localStorage.getItem('proconRecentFiles');
+            if (saved) {
+                recentFiles = JSON.parse(saved);
+                renderRecentFiles();
+            }
+        }
+
+        // Save recent files to localStorage
+        function saveRecentFiles() {
+            localStorage.setItem('proconRecentFiles', JSON.stringify(recentFiles));
+        }
+
+        // Add file to recent list
+        function addToRecentFiles(fileName, filePath, fileType = 'problem') {
+            // Remove if already exists with same name and type
+            recentFiles = recentFiles.filter(f => !(f.name === fileName && f.type === fileType));
+
+            // Add to beginning
+            recentFiles.unshift({
+                name: fileName,
+                path: filePath,
+                type: fileType,
+                timestamp: Date.now()
+            });
+
+            // Keep only last 5 files
+            if (recentFiles.length > 5) {
+                recentFiles = recentFiles.slice(0, 5);
+            }
+
+            saveRecentFiles();
+            renderRecentFiles();
+        }
+
+        // Render recent files list
+        function renderRecentFiles() {
+            const container = document.getElementById('recentFilesList');
+            const recentFilesDiv = document.getElementById('recentFiles');
+
+            if (recentFiles.length === 0) {
+                recentFilesDiv.style.display = 'none';
+                return;
+            }
+
+            container.innerHTML = '';
+            recentFiles.forEach(file => {
+                const item = document.createElement('div');
+                item.className = 'recent-file-item';
+                const fileTypeIcon = file.type === 'solution' ? '🧩' : '📁';
+                const fileTypeText = file.type === 'solution' ? ' (Lời giải)' : ' (Đề bài)';
+                item.innerHTML = `
+                    <div class="file-name">${fileTypeIcon} ${file.name}${fileTypeText}</div>
+                    <div class="file-path">${file.path}</div>
+                `;
+                item.onclick = () => {
+                    showSuccess(`Gợi ý: Hãy chọn file "${file.name}" từ thư mục "${file.path}"`);
+                };
+                container.appendChild(item);
+            });
+
+            recentFilesDiv.style.display = 'block';
+        }
+
+        // Xử lý tải file
+        document.getElementById('fileInput').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Lưu file vào danh sách gần đây
+            addToRecentFiles(file.name, 'problem_new/');
+
+            // Hiển thị đường dẫn file
+            const pathDisplay = document.getElementById('filePathDisplay');
+            pathDisplay.innerHTML = `<strong>File đã chọn:</strong> ${file.name}`;
+            pathDisplay.style.display = 'block';
+
+            showLoading(true);
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    processData(data);
+                } catch (error) {
+                    showError('Lỗi đọc file JSON: ' + error.message);
+                    showLoading(false);
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        // Load solution (ops)
+        document.getElementById('solutionInput').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Kiểm tra xem file lời giải có trùng tên với file đã có không
+            const isDuplicate = recentFiles.some(f => f.name === file.name);
+            if (isDuplicate) {
+                showSuccess(`File "${file.name}" đã tồn tại trong danh sách gần đây, bỏ qua việc thêm vào danh sách nhưng vẫn tải file.`);
+            } else {
+                // Chỉ thêm vào danh sách gần đây nếu không trùng tên
+                addToRecentFiles(file.name, 'output/', 'solution');
+            }
+
+            showLoading(true);
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    parseSolution(data);
+                    showLoading(false);
+                } catch (error) {
+                    showError('Lỗi đọc file lời giải: ' + error.message);
+                    showLoading(false);
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        function processData(data) {
+            try {
+                let matrix;
+
+                // Kiểm tra cấu trúc dữ liệu
+                if (data.problem && data.problem.field && data.problem.field.entities) {
+                    matrix = data.problem.field.entities;
+                } else if (Array.isArray(data) && Array.isArray(data[0])) {
+                    matrix = data;
+                } else if (data.field && data.field.entities) {
+                    matrix = data.field.entities;
+                } else {
+                    throw new Error('Cấu trúc dữ liệu không hợp lệ');
+                }
+
+                if (!matrix || matrix.length === 0) {
+                    throw new Error('Ma trận trống');
+                }
+
+                currentMatrix = matrix.map(row => [...row]);
+                originalMatrix = matrix.map(row => [...row]);
+                rotationCount = 0;
+
+                displayMatrix();
+                updateStats();
+                showFileInfo(data);
+                showControls(true);
+                showSubmatrixControls(true);
+                document.getElementById('solutionControls').style.display = 'block';
+                updateMaxValues();
+
+                // Tự động bật color mode khi tải đề bài
+                colorMode = true;
+                applyColorCoding();
+
+                showLoading(false);
+                showSuccess('Tải dữ liệu thành công và đã tô màu các cặp số!');
+
+            } catch (error) {
+                showError('Lỗi xử lý dữ liệu: ' + error.message);
+                showLoading(false);
+            }
+        }
+
+        function displayMatrix() {
+            const matrixDiv = document.getElementById('matrix');
+
+            // Kiểm tra xem có đang highlight vùng chọn không
+            // Check if selection is currently active before clearing
+            const isSelectionActive = matrixDiv.classList.contains('has-selection-glow');
+
+            // Lưu màu của các ô hiện tại trước khi xóa
+            const cellColors = {};
+            const existingCells = matrixDiv.querySelectorAll('.matrix-cell');
+            existingCells.forEach(cell => {
+                const row = cell.dataset.row;
+                const col = cell.dataset.col;
+                // Lưu tất cả classes và style background
+                cellColors[`${row}-${col}`] = {
+                    classList: cell.className,
+                    background: cell.style.background
+                };
+            });
+
+            matrixDiv.innerHTML = '';
+
+            currentMatrix.forEach((row, rowIndex) => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'matrix-row';
+
+                row.forEach((cell, colIndex) => {
+                    const cellDiv = document.createElement('div');
+                    const key = `${rowIndex}-${colIndex}`;
+                    const savedColor = cellColors[key];
+
+                    cellDiv.className = 'matrix-cell';
+                    cellDiv.textContent = cell;
+                    cellDiv.dataset.row = rowIndex;
+                    cellDiv.dataset.col = colIndex;
+
+                    // Khôi phục màu nếu có (tránh chớp trắng)
+                    if (savedColor) {
+                        cellDiv.style.background = savedColor.background;
+                    }
+
+                    // Thêm hiệu ứng hover với transition mượt
+                    cellDiv.addEventListener('mouseenter', function () {
+                        if (!highlightMode &&
+                            !this.classList.contains('selected') &&
+                            !this.classList.contains('pair-matched') &&
+                            !this.classList.contains('pair-unmatched')) {
+                            this.style.background = '#e3f2fd';
+                        }
+                    });
+
+                    cellDiv.addEventListener('mouseleave', function () {
+                        if (!highlightMode &&
+                            !this.classList.contains('selected') &&
+                            !this.classList.contains('pair-matched') &&
+                            !this.classList.contains('pair-unmatched')) {
+                            this.style.background = savedColor ? savedColor.background : 'white';
+                        }
+                    });
+
+                    // Thêm event listener cho click mode
+                    if (selectionMode === 'click') {
+                        cellDiv.addEventListener('click', function () {
+                            handleCellClick(rowIndex, colIndex);
+                        });
+                    }
+
+                    rowDiv.appendChild(cellDiv);
+                });
+
+                matrixDiv.appendChild(rowDiv);
+            });
+
+            document.getElementById('matrixContainer').style.display = 'block';
+
+            // Áp dụng color coding sau khi render xong (không làm mất màu đã lưu)
+            if (colorMode) {
+                applyColorCoding();
+            }
+
+            // Restore selection highlight if it was active
+            // Khôi phục highlight vùng chọn nếu trước đó đang hiển thị
+            if (isSelectionActive) {
+                highlightSelectedArea();
+            }
+        }
+
+        function rotateMatrix(degrees) {
+            if (currentMatrix.length === 0) return;
+
+            const rotations = degrees / 90;
+
+            for (let i = 0; i < rotations; i++) {
+                currentMatrix = rotate90Clockwise(currentMatrix);
+            }
+
+            rotationCount += rotations;
+            displayMatrix();
+            updateStats();
+            showSuccess(`Đã xoay ma trận ${degrees}°`);
+        }
+
+        function rotateSubMatrix(degrees) {
+            if (currentMatrix.length === 0) return;
+
+            const { x, y, width, height } = selectedArea;
+
+            // Kiểm tra bounds
+            if (x + width > currentMatrix[0].length || y + height > currentMatrix.length) {
+                showError('Vùng chọn vượt quá kích thước ma trận!');
+                return;
+            }
+
+            // Kích hoạt animation trên timeline
+            triggerTimelineRotationAnimation();
+
+            // Thực hiện animation xoay khối "tương tự Rubik"
+            // Animation chạy trong 400ms, sau đó mới cập nhật dữ liệu
+            return animateBlockRotation(x, y, width, height, degrees, 400).then(() => {
+                // Lấy submatrix
+                const subMatrix = [];
+                for (let i = y; i < y + height; i++) {
+                    const row = [];
+                    for (let j = x; j < x + width; j++) {
+                        row.push(currentMatrix[i][j]);
+                    }
+                    subMatrix.push(row);
+                }
+
+                // Xoay submatrix
+                const rotations = Math.abs(degrees) / 90;
+                let rotatedSubMatrix = subMatrix;
+
+                for (let i = 0; i < rotations; i++) {
+                    if (degrees > 0) {
+                        rotatedSubMatrix = rotate90Clockwise(rotatedSubMatrix);
+                    } else {
+                        rotatedSubMatrix = rotate90CounterClockwise(rotatedSubMatrix);
+                    }
+                }
+
+                // Cập nhật lại vào ma trận chính
+                for (let i = 0; i < height; i++) {
+                    for (let j = 0; j < width; j++) {
+                        currentMatrix[y + i][x + j] = rotatedSubMatrix[i][j];
+                    }
+                }
+
+                rotationCount += (degrees > 0 ? rotations : -rotations);
+                displayMatrix();
+                updateStats();
+
+                // Cập nhật timeline sau khi xoay xong
+                updateTimelineUI(currentOpIndex);
+
+                const directionText = degrees > 0 ? 'thuận' : 'ngược';
+                const absIdx = currentOpIndex;
+                const stepMsg = solutionOps.length ? `(Bước ${absIdx}/${solutionOps.length})` : '';
+                showSuccess(`Đã xoay ${directionText} chiều kim đồng hồ ${Math.abs(degrees)}° ${stepMsg}`);
+            });
+        }
+
+        // Kích hoạt animation xoay trên timeline
+        function triggerTimelineRotationAnimation() {
+            const timelineContainer = document.getElementById('timelineContainer');
+            const timelineTrack = document.getElementById('timelineTrack');
+            const timelineProgress = document.getElementById('timelineProgress');
+            const timelineThumb = document.getElementById('timelineThumb');
+
+            if (timelineContainer) timelineContainer.classList.add('rotating');
+            if (timelineTrack) timelineTrack.classList.add('timeline-rotating');
+            if (timelineProgress) timelineProgress.classList.add('timeline-progress-rotating');
+            if (timelineThumb) timelineThumb.classList.add('timeline-thumb-rotating');
+
+            // Tắt animation sau khi xoay xong
+            setTimeout(() => {
+                if (timelineContainer) timelineContainer.classList.remove('rotating');
+                if (timelineTrack) timelineTrack.classList.remove('timeline-rotating');
+                if (timelineProgress) timelineProgress.classList.remove('timeline-progress-rotating');
+                if (timelineThumb) timelineThumb.classList.remove('timeline-thumb-rotating');
+            }, 500);
+        }
+
+        // Highlight step markers during rotation
+        function highlightCurrentStepMarker(stepIndex) {
+            const markers = document.querySelectorAll('.timeline-step-markers span');
+            markers.forEach((marker, idx) => {
+                marker.classList.remove('step-marker-active');
+            });
+
+            // Highlight the current step marker
+            if (stepIndex > 0 && stepIndex < solutionOps.length) {
+                const markerIndex = Math.min(Math.floor(stepIndex / (solutionOps.length / 4)), 3);
+                const marker = document.getElementById(`step${markerIndex + 1}`);
+                if (marker) {
+                    marker.classList.add('step-marker-active');
+                }
+            }
+        }
+
+        function animateBlockRotation(x, y, w, h, degrees, duration) {
+            return new Promise((resolve) => {
+                const matrix = document.getElementById('matrix');
+                const matrixRect = matrix.getBoundingClientRect();
+
+                // 1. Tạo container overlay cho khối xoay
+                const overlay = document.createElement('div');
+                overlay.className = 'rotation-overlay';
+
+                // Tính toán vị trí của khối xoay
+                const firstCell = document.querySelector(`[data-row="${y}"][data-col="${x}"]`);
+                const lastCell = document.querySelector(`[data-row="${y + h - 1}"][data-col="${x + w - 1}"]`);
+
+                if (!firstCell || !lastCell) {
+                    resolve(); // Fallback nếu không tìm thấy DOM
+                    return;
+                }
+
+                const firstRect = firstCell.getBoundingClientRect();
+                const lastRect = lastCell.getBoundingClientRect();
+
+                // Vị trí relative với matrix container
+                const left = firstRect.left - matrixRect.left - matrix.clientLeft;
+                const top = firstRect.top - matrixRect.top - matrix.clientTop;
+                const width = lastRect.right - firstRect.left;
+                const height = lastRect.bottom - firstRect.top;
+
+                // Style cho overlay
+                overlay.style.position = 'absolute';
+                overlay.style.left = left + 'px';
+                overlay.style.top = top + 'px';
+                overlay.style.width = width + 'px';
+                overlay.style.height = height + 'px';
+                overlay.style.zIndex = '200';
+                overlay.style.transformOrigin = 'center center';
+                overlay.style.transition = `transform ${duration}ms cubic-bezier(0.4, 0.0, 0.2, 1)`;
+                // Thêm background trong suốt để debug nếu cần, hoặc highlight nhẹ
+                // overlay.style.background = 'rgba(255,255,255,0.1)'; 
+
+                matrix.appendChild(overlay);
+
+                // 2. Clone các ô vào overlay
+                const clonedCells = [];
+                for (let i = y; i < y + h; i++) {
+                    for (let j = x; j < x + w; j++) {
+                        const originalCell = document.querySelector(`[data-row="${i}"][data-col="${j}"]`);
+                        if (originalCell) {
+                            const clone = originalCell.cloneNode(true);
+                            const cellRect = originalCell.getBoundingClientRect();
+
+                            // Định vị absolute cho clone bên trong overlay
+                            clone.style.position = 'absolute';
+                            clone.style.left = (cellRect.left - firstRect.left) + 'px';
+                            clone.style.top = (cellRect.top - firstRect.top) + 'px';
+                            clone.style.width = cellRect.width + 'px';
+                            clone.style.height = cellRect.height + 'px';
+                            clone.style.margin = '0'; // Reset margin của table-cell nếu có
+                            clone.style.transform = ''; // Reset transform cũ nếu có
+
+                            // Ẩn ô gốc
+                            originalCell.style.opacity = '0';
+
+                            overlay.appendChild(clone);
+                            clonedCells.push({ clone, original: originalCell });
+                        }
+                    }
+                }
+
+                // 3. Trigger animation
+                // Force reflow
+                overlay.offsetHeight;
+                overlay.style.transform = `rotate(${degrees}deg)`;
+
+                // 4. Cleanup sau khi animation xong
+                setTimeout(() => {
+                    // Xóa overlay
+                    overlay.remove();
+                    // Khôi phục opacity ô gốc (displayMatrix sẽ vẽ lại toàn bộ nên bước này chỉ đề phòng)
+                    clonedCells.forEach(item => item.original.style.opacity = '');
+                    resolve();
+                }, duration);
+            });
+        }
+
+        // --- Step Navigation Functions ---
+
+        function stepForward() {
+            // Ngăn chặn nhiều lệnh gọi chồng chéo
+            if (isStepping) return;
+            isStepping = true;
+
+            if (!solutionOps.length) {
+                isStepping = false;
+                return;
+            }
+            if (currentOpIndex >= solutionOps.length) {
+                showSuccess('Đã tới cuối danh sách thao tác');
+                isStepping = false;
+                return;
+            }
+
+            // Stop any auto-play
+            isPlaying = false;
+            clearTimeout(playTimer);
+
+            const op = solutionOps[currentOpIndex];
+
+            // Set selection
+            selectedArea = { x: op.x, y: op.y, width: op.n, height: op.n };
+
+            // Update UI inputs
+            const subX = document.getElementById('subX');
+            const subY = document.getElementById('subY');
+            const subWidth = document.getElementById('subWidth');
+            const subHeight = document.getElementById('subHeight');
+            if (subX) subX.value = op.x;
+            if (subY) subY.value = op.y;
+            if (subWidth) subWidth.value = op.n;
+            if (subHeight) subHeight.value = op.n;
+
+            highlightSelectedArea();
+            renderSelectionSummary(selectedArea, `Thực hiện bước ${currentOpIndex + 1}`, 'active');
+
+            // Rotate forward (90 deg)
+            rotateSubMatrix(90).then(() => {
+                rotationCount++;
+                currentOpIndex++;
+                const timelineSlider = document.getElementById('timelineSlider');
+                if (timelineSlider) timelineSlider.value = currentOpIndex;
+
+                renderOpsList();
+                // Move selection to NEXT step if available
+                if (currentOpIndex < solutionOps.length) {
+                    const nextOp = solutionOps[currentOpIndex];
+                    selectedArea = { x: nextOp.x, y: nextOp.y, width: nextOp.n, height: nextOp.n };
+
+                    if (subX) subX.value = nextOp.x;
+                    if (subY) subY.value = nextOp.y;
+                    if (subWidth) subWidth.value = nextOp.n;
+                    if (subHeight) subHeight.value = nextOp.n;
+
+                    highlightSelectedArea();
+                    renderSelectionSummary(selectedArea, `Chuẩn bị bước ${currentOpIndex + 1}`, 'active');
+                } else {
+                    clearSelectionHighlight();
+                    updateStats();
+                }
+                // Hoàn thành - cho phép các phím tiếp theo
+                isStepping = false;
+            });
+        }
+
+        function stepBackward() {
+            // Ngăn chặn nhiều lệnh gọi chồng chéo
+            if (isStepping) return;
+            isStepping = true;
+
+            if (!solutionOps.length) {
+                isStepping = false;
+                return;
+            }
+            if (currentOpIndex <= 0) {
+                showSuccess('Đã ở bước đầu tiên');
+                isStepping = false;
+                return;
+            }
+
+            // Stop any auto-play
+            isPlaying = false;
+            clearTimeout(playTimer);
+
+            // Undo step i-1
+            const op = solutionOps[currentOpIndex - 1];
+
+            // Set selection
+            selectedArea = { x: op.x, y: op.y, width: op.n, height: op.n };
+
+            // Update UI inputs
+            const subX = document.getElementById('subX');
+            const subY = document.getElementById('subY');
+            const subWidth = document.getElementById('subWidth');
+            const subHeight = document.getElementById('subHeight');
+            if (subX) subX.value = op.x;
+            if (subY) subY.value = op.y;
+            if (subWidth) subWidth.value = op.n;
+            if (subHeight) subHeight.value = op.n;
+
+            highlightSelectedArea();
+            renderSelectionSummary(selectedArea, `Hoàn tác bước ${currentOpIndex}`, 'active');
+
+            currentOpIndex--;
+            const timelineSlider = document.getElementById('timelineSlider');
+            if (timelineSlider) timelineSlider.value = currentOpIndex;
+
+            rotateSubMatrix(-90).then(() => {
+                renderOpsList();
+                // After undo, we are ready to REDO this step, so selection stays here.
+                renderSelectionSummary(selectedArea, `Chuẩn bị bước ${currentOpIndex + 1}`, 'active');
+                // Hoàn thành - cho phép các phím tiếp theo
+                isStepping = false;
+            });
+        }
+
+        function rotate90CounterClockwise(matrix) {
+            const rows = matrix.length;
+            const cols = matrix[0].length;
+            const rotated = Array(cols).fill().map(() => Array(rows).fill(0));
+
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    rotated[cols - 1 - j][i] = matrix[i][j];
+                }
+            }
+            return rotated;
+        }
+
+        function rotate90Clockwise(matrix) {
+            const rows = matrix.length;
+            const cols = matrix[0].length;
+            const rotated = Array(cols).fill().map(() => Array(rows).fill(0));
+
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    rotated[j][rows - 1 - i] = matrix[i][j];
+                }
+            }
+
+            return rotated;
+        }
+
+        function resetMatrix() {
+            currentMatrix = originalMatrix.map(row => [...row]);
+            rotationCount = 0;
+            displayMatrix();
+            updateStats();
+            showSuccess('Đã reset ma trận về trạng thái ban đầu');
+        }
+
+        function highlightNumbers() {
+            highlightMode = !highlightMode;
+            const cells = document.querySelectorAll('.matrix-cell');
+
+            if (highlightMode) {
+                // Tìm các số xuất hiện nhiều lần
+                const numberCount = {};
+                currentMatrix.forEach(row => {
+                    row.forEach(num => {
+                        numberCount[num] = (numberCount[num] || 0) + 1;
+                    });
+                });
+
+                cells.forEach(cell => {
+                    const num = parseInt(cell.textContent);
+                    if (numberCount[num] > 1) {
+                        cell.classList.add('highlight');
+                    }
+                });
+
+                showSuccess('Đã highlight các số xuất hiện nhiều lần');
+            } else {
+                cells.forEach(cell => {
+                    cell.classList.remove('highlight');
+                    if (!colorMode) {
+                        cell.style.background = 'white';
+                    }
+                });
+                showSuccess('Đã tắt highlight');
+            }
+        }
+
+        function colorCodePairs() {
+            colorMode = !colorMode;
+            const cells = document.querySelectorAll('.matrix-cell');
+
+            if (colorMode) {
+                applyColorCoding();
+                showSuccess('Đã bật phân biệt cặp: xanh (đã ghép) / đỏ (chưa ghép)');
+            } else {
+                cells.forEach(cell => {
+                    cell.classList.remove('pair-matched', 'pair-unmatched');
+                    if (!highlightMode) {
+                        cell.style.background = 'white';
+                    }
+                });
+                showSuccess('Đã tắt phân biệt cặp');
+            }
+        }
+
+        function applyColorCoding() {
+            if (!colorMode || currentMatrix.length === 0) return;
+
+            const matchedCells = new Set();
+            const directions = [
+                [1, 0], [-1, 0],
+                [0, 1], [0, -1]
+            ];
+
+            for (let row = 0; row < currentMatrix.length; row++) {
+                const rowLength = currentMatrix[row].length;
+                for (let col = 0; col < rowLength; col++) {
+                    const value = currentMatrix[row][col];
+
+                    for (const [dx, dy] of directions) {
+                        const nr = row + dy;
+                        const nc = col + dx;
+                        if (nr < 0 || nr >= currentMatrix.length) continue;
+                        if (nc < 0 || nc >= currentMatrix[nr].length) continue;
+
+                        if (currentMatrix[nr][nc] === value) {
+                            matchedCells.add(`${row}-${col}`);
+                            matchedCells.add(`${nr}-${nc}`);
+                        }
+                    }
+                }
+            }
+
+            const cells = document.querySelectorAll('.matrix-cell');
+            cells.forEach(cell => {
+                const row = parseInt(cell.dataset.row, 10);
+                const col = parseInt(cell.dataset.col, 10);
+                if (Number.isNaN(row) || Number.isNaN(col)) return;
+                const key = `${row}-${col}`;
+
+                cell.classList.remove('pair-matched', 'pair-unmatched');
+                if (matchedCells.has(key)) {
+                    cell.classList.add('pair-matched');
+                } else {
+                    cell.classList.add('pair-unmatched');
+                }
+            });
+        }
+
+        function updateStats() {
+            if (currentMatrix.length === 0) return;
+
+            const size = currentMatrix.length;
+            const totalNumbers = size * size;
+            const uniqueNumbers = new Set();
+
+            currentMatrix.forEach(row => {
+                row.forEach(num => uniqueNumbers.add(num));
+            });
+
+            // Tính tiến độ giải bài
+            const progress = calculateProgress();
+            const solvedCells = Math.round((progress / 100) * totalNumbers);
+
+            document.getElementById('matrixSize').textContent = `${size}×${size}`;
+            document.getElementById('totalNumbers').textContent = totalNumbers;
+            document.getElementById('uniqueNumbers').textContent = uniqueNumbers.size;
+            document.getElementById('rotationCount').textContent = rotationCount;
+            document.getElementById('progressPercent').textContent = `${progress.toFixed(1)}%`;
+            document.getElementById('solvedCells').textContent = solvedCells;
+
+            document.getElementById('stats').style.display = 'grid';
+        }
+
+        function calculateProgress() {
+            if (currentMatrix.length === 0) return 0;
+
+            // Đếm số ô đã được sắp xếp đúng (các số liên tiếp theo hàng hoặc cột)
+            let correctCells = 0;
+            const size = currentMatrix.length;
+
+            // Kiểm tra từng hàng
+            for (let i = 0; i < size; i++) {
+                for (let j = 0; j < size; j++) {
+                    const currentValue = currentMatrix[i][j];
+
+                    // Kiểm tra xem ô này có nằm trong chuỗi liên tiếp không
+                    let isInSequence = false;
+
+                    // Kiểm tra hàng ngang (trái-phải)
+                    if (j > 0 && j < size - 1) {
+                        const left = currentMatrix[i][j - 1];
+                        const right = currentMatrix[i][j + 1];
+                        if (Math.abs(currentValue - left) === 1 && Math.abs(currentValue - right) === 1) {
+                            isInSequence = true;
+                        }
+                    }
+
+                    // Kiểm tra hàng dọc (trên-dưới)
+                    if (i > 0 && i < size - 1) {
+                        const top = currentMatrix[i - 1][j];
+                        const bottom = currentMatrix[i + 1][j];
+                        if (Math.abs(currentValue - top) === 1 && Math.abs(currentValue - bottom) === 1) {
+                            isInSequence = true;
+                        }
+                    }
+
+                    // Kiểm tra góc và biên
+                    if (j === 0 && j < size - 1) {
+                        const right = currentMatrix[i][j + 1];
+                        if (Math.abs(currentValue - right) === 1) isInSequence = true;
+                    }
+                    if (j === size - 1 && j > 0) {
+                        const left = currentMatrix[i][j - 1];
+                        if (Math.abs(currentValue - left) === 1) isInSequence = true;
+                    }
+                    if (i === 0 && i < size - 1) {
+                        const bottom = currentMatrix[i + 1][j];
+                        if (Math.abs(currentValue - bottom) === 1) isInSequence = true;
+                    }
+                    if (i === size - 1 && i > 0) {
+                        const top = currentMatrix[i - 1][j];
+                        if (Math.abs(currentValue - top) === 1) isInSequence = true;
+                    }
+
+                    if (isInSequence) {
+                        correctCells++;
+                    }
+                }
+            }
+
+            const totalCells = size * size;
+            return (correctCells / totalCells) * 100;
+        }
+
+        function showFileInfo(data) {
+            const fileInfo = document.getElementById('fileInfo');
+            let info = `<strong>Thông tin file:</strong><br>`;
+
+            if (data.startsAt) {
+                const date = new Date(data.startsAt * 1000);
+                info += `Thời gian bắt đầu: ${date.toLocaleString('vi-VN')}<br>`;
+            }
+
+            if (data.problem && data.problem.field && data.problem.field.size) {
+                info += `Kích thước: ${data.problem.field.size}×${data.problem.field.size}<br>`;
+            }
+
+            fileInfo.innerHTML = info;
+            fileInfo.style.display = 'block';
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+
+        function showControls(show) {
+            document.getElementById('controls').style.display = show ? 'flex' : 'none';
+        }
+
+        function showSubmatrixControls(show) {
+            const controls = document.getElementById('submatrixControls');
+            if (!controls) return;
+            controls.style.display = show ? 'block' : 'none';
+            if (show) {
+                refreshSelectionPreview('Chưa áp dụng', 'draft');
+            }
+        }
+
+        function updateMaxValues() {
+            if (currentMatrix.length === 0) return;
+
+            const maxSize = currentMatrix.length;
+            document.getElementById('subWidth').max = maxSize;
+            document.getElementById('subHeight').max = maxSize;
+            document.getElementById('subX').max = maxSize - 1;
+            document.getElementById('subY').max = maxSize - 1;
+        }
+
+        function setSelectionMode(mode) {
+            selectionMode = mode;
+
+            // Cập nhật UI
+            document.getElementById('manualMode').classList.toggle('active', mode === 'manual');
+            document.getElementById('clickMode').classList.toggle('active', mode === 'click');
+            const statusPill = document.getElementById('selectionStatusPill');
+            if (statusPill) {
+                statusPill.textContent = mode === 'manual' ? 'Nhập thủ công' : 'Click trực tiếp';
+                statusPill.classList.toggle('manual', mode === 'manual');
+                statusPill.classList.toggle('click', mode === 'click');
+            }
+
+            // Cập nhật event listeners
+            displayMatrix();
+
+            showSuccess(`Chế độ chọn: ${mode === 'manual' ? 'Nhập thủ công' : 'Click để chọn'}`);
+        }
+
+        function renderSelectionSummary(area, statusText = 'Nháp từ biểu mẫu', statusType = 'draft') {
+            const summaryEl = document.getElementById('selectionSummary');
+            if (!summaryEl) return;
+            const formatValue = (value) => {
+                if (value === undefined || value === null || value === '') return '—';
+                return value;
+            };
+            const widthText = formatValue(area && 'width' in area ? area.width : undefined);
+            const heightText = formatValue(area && 'height' in area ? area.height : undefined);
+            const xText = formatValue(area && 'x' in area ? area.x : undefined);
+            const yText = formatValue(area && 'y' in area ? area.y : undefined);
+
+            summaryEl.innerHTML = `
+                <div class="summary-chip">
+                    <span>Kích thước</span>
+                    <strong>${widthText} × ${heightText}</strong>
+                </div>
+                <div class="summary-chip">
+                    <span>Góc trên bên trái</span>
+                    <strong>(${xText}, ${yText})</strong>
+                </div>
+                <div class="summary-footer">
+                    <span class="status-dot ${statusType}"></span>
+                    <span>${statusText}</span>
+                </div>
+            `;
+        }
+
+        function refreshSelectionPreview(statusText = 'Nháp từ biểu mẫu', statusType = 'draft') {
+            const widthInput = document.getElementById('subWidth');
+            const heightInput = document.getElementById('subHeight');
+            const xInput = document.getElementById('subX');
+            const yInput = document.getElementById('subY');
+            if (!widthInput || !heightInput || !xInput || !yInput) return;
+            renderSelectionSummary({
+                width: widthInput.value,
+                height: heightInput.value,
+                x: xInput.value,
+                y: yInput.value
+            }, statusText, statusType);
+        }
+
+        function stepSelection(fieldId, delta) {
+            const input = document.getElementById(fieldId);
+            if (!input) return;
+            const current = parseInt(input.value, 10) || 0;
+            const parseBound = (value, fallback) => {
+                const parsed = parseInt(value, 10);
+                return Number.isNaN(parsed) ? fallback : parsed;
+            };
+            const min = input.hasAttribute('min') ? parseBound(input.min, Number.NEGATIVE_INFINITY) : Number.NEGATIVE_INFINITY;
+            const max = input.hasAttribute('max') ? parseBound(input.max, Number.POSITIVE_INFINITY) : Number.POSITIVE_INFINITY;
+            let next = current + delta;
+            next = Math.max(min, Math.min(max, next));
+            input.value = next;
+            refreshSelectionPreview();
+        }
+
+        function updateSelection() {
+            const width = parseInt(document.getElementById('subWidth').value);
+            const height = parseInt(document.getElementById('subHeight').value);
+            const x = parseInt(document.getElementById('subX').value);
+            const y = parseInt(document.getElementById('subY').value);
+
+            if (width <= 0 || height <= 0) {
+                showError('Kích thước phải lớn hơn 0!');
+                return;
+            }
+
+            if (x < 0 || y < 0) {
+                showError('Vị trí không được âm!');
+                return;
+            }
+
+            if (x + width > currentMatrix[0].length || y + height > currentMatrix.length) {
+                showError('Vùng chọn vượt quá kích thước ma trận!');
+                return;
+            }
+
+            selectedArea = { x, y, width, height };
+            renderSelectionSummary(selectedArea, 'Đang highlight trên ma trận', 'active');
+            highlightSelectedArea();
+            showSuccess(`Đã chọn vùng ${width}×${height} tại (${x},${y})`);
+        }
+
+        function clearSelection() {
+            // Xóa viền liền mạch
+            const outline = document.querySelector('.selection-outline');
+            if (outline) {
+                outline.remove();
+            }
+            const matrix = document.getElementById('matrix');
+            if (matrix) {
+                matrix.classList.remove('has-selection-glow');
+            }
+        }
+
+        function clearSelectionHighlight() {
+            clearSelection();
+            renderSelectionSummary(selectedArea, 'Đã xóa highlight', 'draft');
+        }
+
+        function highlightSelectedArea() {
+            // Xóa highlight cũ
+            clearSelection();
+
+            const { x, y, width, height } = selectedArea;
+
+            // Lấy ô đầu và ô cuối của vùng chọn để tính toán chính xác kích thước thực tế
+            const firstCell = document.querySelector(`[data-row="${y}"][data-col="${x}"]`);
+            const lastCell = document.querySelector(`[data-row="${y + height - 1}"][data-col="${x + width - 1}"]`);
+
+            if (!firstCell || !lastCell) return;
+
+            const firstRect = firstCell.getBoundingClientRect();
+            const lastRect = lastCell.getBoundingClientRect();
+            const matrix = document.getElementById('matrix');
+            const matrixRect = matrix.getBoundingClientRect();
+
+            // Tính toán vị trí tương đối chính xác, trừ đi border của matrix container
+            const left = firstRect.left - matrixRect.left - matrix.clientLeft;
+            const top = firstRect.top - matrixRect.top - matrix.clientTop;
+            const pixelWidth = lastRect.right - firstRect.left;
+            const pixelHeight = lastRect.bottom - firstRect.top;
+
+            // Tạo viền liền mạch bao quanh vùng chọn
+            const outline = document.createElement('div');
+            outline.className = 'selection-outline';
+
+            // Đặt vị trí và kích thước "vừa như in" với các ô
+            outline.style.left = left + 'px';
+            outline.style.top = top + 'px';
+            outline.style.width = pixelWidth + 'px';
+            outline.style.height = pixelHeight + 'px';
+
+            matrix.appendChild(outline);
+            matrix.classList.add('has-selection-glow');
+        }
+
+        function handleCellClick(row, col) {
+            if (selectionMode !== 'click') return;
+
+            if (!isSelecting) {
+                // Bắt đầu chọn
+                selectionStart = { row, col };
+                isSelecting = true;
+                clearSelection();
+            } else {
+                // Kết thúc chọn
+                const endRow = Math.max(selectionStart.row, row);
+                const endCol = Math.max(selectionStart.col, col);
+                const startRow = Math.min(selectionStart.row, row);
+                const startCol = Math.min(selectionStart.col, col);
+
+                selectedArea = {
+                    x: startCol,
+                    y: startRow,
+                    width: endCol - startCol + 1,
+                    height: endRow - startRow + 1
+                };
+
+                // Cập nhật UI
+                document.getElementById('subX').value = startCol;
+                document.getElementById('subY').value = startRow;
+                document.getElementById('subWidth').value = endCol - startCol + 1;
+                document.getElementById('subHeight').value = endRow - startRow + 1;
+
+                highlightSelectedArea();
+                renderSelectionSummary(selectedArea, 'Được chọn từ ma trận', 'auto');
+                isSelecting = false;
+                selectionStart = null;
+
+                showSuccess(`Đã chọn vùng ${selectedArea.width}×${selectedArea.height} tại (${selectedArea.x},${selectedArea.y})`);
+            }
+        }
+
+        // ---------- Solution (ops) handling ----------
+        function parseSolution(data) {
+            let ops = [];
+            if (Array.isArray(data.ops)) {
+                ops = data.ops;
+            } else if (Array.isArray(data)) {
+                ops = data;
+            } else {
+                throw new Error('Cấu trúc lời giải không hợp lệ. Cần mảng ops hoặc { ops: [...] }');
+            }
+
+            // Validate
+            ops.forEach((op, idx) => {
+                if (!Number.isInteger(op.x) || !Number.isInteger(op.y) || !Number.isInteger(op.n)) {
+                    throw new Error(`Op #${idx} thiếu x/y/n dạng số nguyên`);
+                }
+                if (op.n <= 0) {
+                    throw new Error(`Op #${idx} có n không hợp lệ`);
+                }
+                if (op.x < 0 || op.y < 0) {
+                    throw new Error(`Op #${idx} có toạ độ âm`);
+                }
+                if (op.y + op.n > currentMatrix.length || op.x + op.n > currentMatrix[0].length) {
+                    throw new Error(`Op #${idx} vượt quá biên ma trận`);
+                }
+            });
+
+            solutionOps = ops;
+            currentOpIndex = 0;
+            renderOpsList();
+
+            // Show ops list
+            document.getElementById('opsList').style.display = 'block';
+
+            // Show and initialize timeline
+            const timelineContainer = document.getElementById('timelineContainer');
+            if (timelineContainer) {
+                timelineContainer.classList.add('active');
+                // Set slider max value
+                const timelineSlider = document.getElementById('timelineSlider');
+                if (timelineSlider) {
+                    timelineSlider.max = ops.length;
+                    timelineSlider.value = 0;
+                }
+                // Update timeline UI
+                updateTimelineUI(0);
+            }
+
+            // Tự động highlight bước đầu tiên
+            // Automatically highlight the first step
+            if (solutionOps.length > 0) {
+                const op = solutionOps[0];
+                selectedArea = { x: op.x, y: op.y, width: op.n, height: op.n };
+
+                // Update UI inputs
+                const subX = document.getElementById('subX');
+                const subY = document.getElementById('subY');
+                const subWidth = document.getElementById('subWidth');
+                const subHeight = document.getElementById('subHeight');
+
+                if (subX) subX.value = op.x;
+                if (subY) subY.value = op.y;
+                if (subWidth) subWidth.value = op.n;
+                if (subHeight) subHeight.value = op.n;
+
+                renderSelectionSummary(selectedArea, 'Bước 1 từ lời giải', 'auto');
+                highlightSelectedArea();
+            }
+
+            showSuccess(`Đã tải ${ops.length} thao tác từ lời giải`);
+        }
+
+        function renderOpsList() {
+            const list = document.getElementById('opsList');
+            list.innerHTML = '';
+            solutionOps.forEach((op, idx) => {
+                const item = document.createElement('div');
+                item.className = 'op-item' + (idx === currentOpIndex ? ' active' : '');
+                item.textContent = `#${idx + 1}: x=${op.x}, y=${op.y}, n=${op.n}`;
+                list.appendChild(item);
+            });
+            // KHÔNG tự động scrollIntoView để tránh giật trang khi xoay
+        }
+
+        function updateSpeed() {
+            const sel = document.getElementById('speedSelect');
+            playSpeedMs = parseInt(sel.value, 10) || 800;
+        }
+
+        function playSolution() {
+            if (!solutionOps.length) {
+                showError('Chưa có lời giải. Hãy tải file ops trước.');
+                return;
+            }
+            if (isPlaying) return;
+            isPlaying = true;
+
+            // Add rotation animation to play button
+            const playBtn = document.getElementById('btnPlay');
+            if (playBtn) {
+                playBtn.classList.add('rotating');
+            }
+
+            scheduleNext();
+        }
+
+        function scheduleNext() {
+            clearTimeout(playTimer);
+            if (!isPlaying) return;
+            if (currentOpIndex >= solutionOps.length) {
+                isPlaying = false;
+                showSuccess('Đã chạy xong toàn bộ lời giải');
+                return;
+            }
+            playTimer = setTimeout(() => {
+                stepSolution();
+                scheduleNext();
+            }, playSpeedMs + 300); // Thêm 300ms để có thời gian xem vùng chọn
+        }
+
+        function pauseSolution() {
+            isPlaying = false;
+            clearTimeout(playTimer);
+
+            // Remove rotation animation from play button
+            const playBtn = document.getElementById('btnPlay');
+            if (playBtn) {
+                playBtn.classList.remove('rotating');
+            }
+
+            // Add rotation animation to pause button
+            const pauseBtn = document.getElementById('btnPause');
+            if (pauseBtn) {
+                pauseBtn.classList.add('rotating');
+                setTimeout(() => pauseBtn.classList.remove('rotating'), 400);
+            }
+        }
+
+        function stopSolution() {
+            pauseSolution();
+
+            // Không reset currentOpIndex - giữ nguyên vị trí hiện tại
+            renderOpsList();
+
+            // Add rotation animation to stop button
+            const stopBtn = document.getElementById('btnStop');
+            if (stopBtn) {
+                stopBtn.classList.add('rotating');
+                setTimeout(() => stopBtn.classList.remove('rotating'), 400);
+            }
+
+            // Reset ma trận về original rồi áp dụng lại các bước đã thực hiện
+            currentMatrix = originalMatrix.map(row => [...row]);
+            rotationCount = 0;
+
+            // Áp dụng lại tất cả các bước từ đầu đến currentOpIndex - 1
+            for (let i = 0; i < currentOpIndex; i++) {
+                const op = solutionOps[i];
+                rotateSubMatrixOnMatrix(currentMatrix, op.x, op.y, op.n, 90);
+                rotationCount++;
+            }
+
+            displayMatrix();
+            updateStats();
+
+            // Reset timeline UI (giữ nguyên vị trí thumb)
+            updateTimelineUI(currentOpIndex);
+            const timelineSlider = document.getElementById('timelineSlider');
+            if (timelineSlider) {
+                timelineSlider.value = currentOpIndex;
+            }
+
+            // Highlight vùng chọn hiện tại
+            if (currentOpIndex < solutionOps.length) {
+                const op = solutionOps[currentOpIndex];
+                selectedArea = { x: op.x, y: op.y, width: op.n, height: op.n };
+                document.getElementById('subX').value = op.x;
+                document.getElementById('subY').value = op.y;
+                document.getElementById('subWidth').value = op.n;
+                document.getElementById('subHeight').value = op.n;
+                renderSelectionSummary(selectedArea, `Bước ${currentOpIndex + 1} từ lời giải`, 'auto');
+                highlightSelectedArea();
+            } else {
+                clearSelectionHighlight();
+            }
+
+            showSuccess('Đã dừng tại bước ' + currentOpIndex + '/' + solutionOps.length);
+        }
+
+        function stepSolution() {
+            if (!solutionOps.length) {
+                showError('Chưa có lời giải. Hãy tải file ops trước.');
+                return;
+            }
+            if (currentOpIndex >= solutionOps.length) {
+                showSuccess('Đã tới cuối danh sách thao tác');
+                return;
+            }
+
+            // Add rotation animation to step button
+            const stepBtn = document.getElementById('btnStep');
+            if (stepBtn) {
+                stepBtn.classList.add('rotating');
+                setTimeout(() => stepBtn.classList.remove('rotating'), 400);
+            }
+
+            const op = solutionOps[currentOpIndex];
+
+            // Cập nhật vùng chọn theo op
+            selectedArea = { x: op.x, y: op.y, width: op.n, height: op.n };
+
+            // Cập nhật UI inputs để hiển thị vùng chọn
+            document.getElementById('subX').value = op.x;
+            document.getElementById('subY').value = op.y;
+            document.getElementById('subWidth').value = op.n;
+            document.getElementById('subHeight').value = op.n;
+            renderSelectionSummary(selectedArea, 'Theo bước lời giải', 'auto');
+
+            // Highlight vùng chọn trước khi xoay
+            highlightSelectedArea();
+
+            // Delay một chút để người dùng thấy vùng chọn
+            setTimeout(() => {
+                rotateSubMatrix(90).then(() => {
+                    currentOpIndex += 1;
+                    renderOpsList();
+
+                    // Update timeline UI
+                    updateTimelineUI(currentOpIndex);
+
+                    // Update hidden slider value
+                    const timelineSlider = document.getElementById('timelineSlider');
+                    if (timelineSlider) {
+                        timelineSlider.value = currentOpIndex;
+                    }
+
+                    // Cập nhật highlight cho bước tiếp theo (giống stepForward)
+                    if (currentOpIndex < solutionOps.length) {
+                        const nextOp = solutionOps[currentOpIndex];
+                        selectedArea = { x: nextOp.x, y: nextOp.y, width: nextOp.n, height: nextOp.n };
+
+                        // Update UI inputs
+                        document.getElementById('subX').value = nextOp.x;
+                        document.getElementById('subY').value = nextOp.y;
+                        document.getElementById('subWidth').value = nextOp.n;
+                        document.getElementById('subHeight').value = nextOp.n;
+
+                        renderSelectionSummary(selectedArea, `Chuẩn bị bước ${currentOpIndex + 1}`, 'active');
+                        highlightSelectedArea();
+                    } else {
+                        clearSelectionHighlight();
+                    }
+                });
+            }, 300);
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+
+            const container = document.querySelector('.main-content');
+            const existingError = container.querySelector('.error');
+            if (existingError) {
+                existingError.remove();
+            }
+
+            container.insertBefore(errorDiv, container.firstChild);
+
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success';
+            successDiv.textContent = message;
+
+            const container = document.querySelector('.main-content');
+            const existingSuccess = container.querySelector('.success');
+            if (existingSuccess) {
+                existingSuccess.remove();
+            }
+
+            container.insertBefore(successDiv, container.firstChild);
+
+            setTimeout(() => {
+                successDiv.remove();
+            }, 3000);
+        }
+
+        // Load recent files when page loads
+        loadRecentFiles();
+        refreshSelectionPreview('Chưa áp dụng', 'draft');
+
+        // Drag and drop functionality
+        const uploadSection = document.querySelector('.upload-section');
+
+        uploadSection.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            this.style.borderColor = '#4facfe';
+            this.style.background = '#f0f8ff';
+        });
+
+        uploadSection.addEventListener('dragleave', function (e) {
+            e.preventDefault();
+            this.style.borderColor = '#dee2e6';
+            this.style.background = '#f8f9fa';
+        });
+
+        uploadSection.addEventListener('drop', function (e) {
+            e.preventDefault();
+            this.style.borderColor = '#dee2e6';
+            this.style.background = '#f8f9fa';
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                const file = files[0];
+                if (file.type === 'application/json' || file.name.endsWith('.json')) {
+                    document.getElementById('fileInput').files = files;
+                    document.getElementById('fileInput').dispatchEvent(new Event('change'));
+                } else {
+                    showError('Vui lòng chọn file JSON');
+                }
+            }
+        });
+
+        // Drag-to-scroll functionality for matrix container
+        const matrixContainer = document.getElementById('matrixContainer');
+        let isDragging = false;
+        let dragStartX, dragStartY;
+        let scrollStartX, scrollStartY;
+
+        matrixContainer.addEventListener('mousedown', function (e) {
+            // Only start dragging if clicking on the container itself (not on cells)
+            if (e.target === matrixContainer || e.target.classList.contains('matrix')) {
+                isDragging = true;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+                scrollStartX = matrixContainer.scrollLeft;
+                scrollStartY = matrixContainer.scrollTop;
+                matrixContainer.style.cursor = 'grabbing';
+                matrixContainer.style.userSelect = 'none';
+                e.preventDefault();
+            }
+        });
+
+        document.addEventListener('mousemove', function (e) {
+            if (!isDragging) return;
+
+            const dx = e.clientX - dragStartX;
+            const dy = e.clientY - dragStartY;
+
+            matrixContainer.scrollLeft = scrollStartX - dx;
+            matrixContainer.scrollTop = scrollStartY - dy;
+        });
+
+        document.addEventListener('mouseup', function () {
+            if (isDragging) {
+                isDragging = false;
+                matrixContainer.style.cursor = 'grab';
+                matrixContainer.style.userSelect = '';
+            }
+        });
+
+        // Set initial cursor
+        if (matrixContainer) {
+            matrixContainer.style.cursor = 'grab';
+        }
+
+        // Prevent page jump on button clicks by preventing default on control buttons
+        document.querySelectorAll('.control-button').forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+            });
+        });
+
+        // ========== Timeline Drag Functionality ==========
+        const timelineTrack = document.getElementById('timelineTrack');
+        const timelineThumb = document.getElementById('timelineThumb');
+        let isTimelineDragging = false;
+        let timelineStartX;
+
+        if (timelineTrack) {
+            timelineTrack.addEventListener('mousedown', function (e) {
+                isTimelineDragging = true;
+                timelineStartX = e.clientX;
+                timelineTrack.style.cursor = 'grabbing';
+                e.preventDefault();
+                e.stopPropagation();
+            });
+
+            document.addEventListener('mousemove', function (e) {
+                if (!isTimelineDragging || !solutionOps.length) return;
+
+                const rect = timelineTrack.getBoundingClientRect();
+                let percent = (e.clientX - rect.left) / rect.width;
+                percent = Math.max(0, Math.min(1, percent));
+
+                const stepIndex = Math.round(percent * solutionOps.length);
+                updateTimelineUI(stepIndex);
+
+                // Update preview while dragging (optional - can be slow for large matrices)
+                if (solutionOps.length <= 20) {
+                    previewStep(stepIndex);
+                }
+            });
+
+            document.addEventListener('mouseup', function (e) {
+                if (isTimelineDragging) {
+                    isTimelineDragging = false;
+                    if (timelineTrack) timelineTrack.style.cursor = 'grab';
+
+                    // Apply the final step
+                    const rect = timelineTrack.getBoundingClientRect();
+                    let percent = (e.clientX - rect.left) / rect.width;
+                    percent = Math.max(0, Math.min(1, percent));
+
+                    const stepIndex = Math.round(percent * solutionOps.length);
+                    jumpToStep(stepIndex);
+                }
+            });
+        }
+
+        // ========== Keyboard Navigation for Timeline ==========
+        document.addEventListener('keydown', function (e) {
+            // Only activate if solution is loaded and user is focused on page
+            if (!solutionOps.length) return;
+
+            // Check if user is not typing in an input field
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+            // Prevent rapid key presses from causing race conditions
+            // Nếu đang trong quá trình step, bỏ qua các phím tiếp theo
+            if (isStepping) {
+                e.preventDefault();
+                return;
+            }
+
+            const stepSize = e.shiftKey ? 5 : 1; // Hold Shift to skip 5 steps at once
+
+            switch (e.key) {
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    // Move backward
+                    const newStepLeft = Math.max(0, currentOpIndex - stepSize);
+                    if (newStepLeft !== currentOpIndex) {
+                        if (currentOpIndex - newStepLeft === 1) {
+                            stepBackward();
+                        } else {
+                            triggerTimelineRotationAnimation();
+                            jumpToStep(newStepLeft);
+                        }
+                    }
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    // Move forward
+                    const newStepRight = Math.min(solutionOps.length, currentOpIndex + stepSize);
+                    if (newStepRight !== currentOpIndex) {
+                        if (newStepRight - currentOpIndex === 1) {
+                            stepForward();
+                        } else {
+                            triggerTimelineRotationAnimation();
+                            jumpToStep(newStepRight);
+                        }
+                    }
+                    break;
+                case 'Home':
+                    e.preventDefault();
+                    triggerTimelineRotationAnimation();
+                    jumpToStep(0);
+                    break;
+                case 'End':
+                    e.preventDefault();
+                    triggerTimelineRotationAnimation();
+                    jumpToStep(solutionOps.length);
+                    break;
+            }
+        });
+
+        // Add visual hint about keyboard navigation
+        const timelineHeader = document.querySelector('.timeline-header');
+        if (timelineHeader) {
+            const hint = document.createElement('span');
+            hint.className = 'timeline-hint';
+            hint.innerHTML = ' ⌨️ <kbd>←</kbd> <kbd>→</kbd> để điều khiển | <kbd>Shift</kbd>+<kbd>←</kbd> nhảy 5 bước';
+            hint.style.cssText = 'font-size: 0.75em; color: #6c757d; margin-left: 10px; background: #f8f9fa; padding: 2px 8px; border-radius: 4px;';
+            timelineHeader.appendChild(hint);
+        }
+
+        // Update timeline UI (progress bar and thumb position)
+        function updateTimelineUI(stepIndex) {
+            if (!solutionOps.length) return;
+
+            const percent = (stepIndex / solutionOps.length) * 100;
+            const progress = document.getElementById('timelineProgress');
+            const thumb = document.getElementById('timelineThumb');
+
+            if (progress) progress.style.width = percent + '%';
+            if (thumb) thumb.style.left = percent + '%';
+
+            const infoEl = document.getElementById('timelineInfo');
+            if (infoEl) {
+                infoEl.textContent = `Bước: ${stepIndex} / ${solutionOps.length}`;
+            }
+
+            // Update step markers visibility
+            updateStepMarkers();
+        }
+
+        // Update step markers
+        function updateStepMarkers() {
+            if (!solutionOps.length) return;
+
+            const totalSteps = solutionOps.length;
+            const markers = ['step1', 'step2', 'step3', 'step4'];
+
+            markers.forEach((markerId, idx) => {
+                const marker = document.getElementById(markerId);
+                if (marker && totalSteps > 1) {
+                    const stepNum = Math.round((idx + 1) * totalSteps / 5);
+                    if (stepNum < totalSteps) {
+                        marker.textContent = stepNum;
+                        marker.style.visibility = 'visible';
+                    } else {
+                        marker.style.visibility = 'hidden';
+                    }
+                }
+            });
+        }
+
+        // Preview a step without applying permanent changes
+        function previewStep(stepIndex) {
+            if (!solutionOps.length || stepIndex < 0 || stepIndex > solutionOps.length) return;
+
+            // Clone the original matrix
+            const tempMatrix = originalMatrix.map(row => [...row]);
+
+            // Apply all ops up to the target step
+            for (let i = 0; i < stepIndex; i++) {
+                const op = solutionOps[i];
+                rotateSubMatrixOnMatrix(tempMatrix, op.x, op.y, op.n, 90);
+            }
+
+            // Temporarily display the preview
+            displayMatrixPreview(tempMatrix);
+        }
+
+        // Display matrix preview (for timeline dragging)
+        function displayMatrixPreview(matrixData) {
+            const matrixDiv = document.getElementById('matrix');
+
+            matrixDiv.innerHTML = '';
+
+            matrixData.forEach((row, rowIndex) => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'matrix-row';
+
+                row.forEach((cell, colIndex) => {
+                    const cellDiv = document.createElement('div');
+                    cellDiv.className = 'matrix-cell';
+                    cellDiv.textContent = cell;
+                    cellDiv.dataset.row = rowIndex;
+                    cellDiv.dataset.col = colIndex;
+
+                    // Apply color coding if enabled
+                    if (colorMode) {
+                        // Temporarily set color based on current logic
+                        const matchedCells = getMatchedCells(matrixData);
+                        const key = `${rowIndex}-${colIndex}`;
+                        if (matchedCells.has(key)) {
+                            cellDiv.classList.add('pair-matched');
+                        } else {
+                            cellDiv.classList.add('pair-unmatched');
+                        }
+                    }
+
+                    rowDiv.appendChild(cellDiv);
+                });
+
+                matrixDiv.appendChild(rowDiv);
+            });
+        }
+
+        // Get matched cells for color coding
+        function getMatchedCells(matrixData) {
+            const matchedCells = new Set();
+            const directions = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+
+            for (let row = 0; row < matrixData.length; row++) {
+                for (let col = 0; col < matrixData[row].length; col++) {
+                    const value = matrixData[row][col];
+
+                    for (const [dx, dy] of directions) {
+                        const nr = row + dy;
+                        const nc = col + dx;
+                        if (nr < 0 || nr >= matrixData.length) continue;
+                        if (nc < 0 || nc >= matrixData[nr].length) continue;
+
+                        if (matrixData[nr][nc] === value) {
+                            matchedCells.add(`${row}-${col}`);
+                            matchedCells.add(`${nr}-${nc}`);
+                        }
+                    }
+                }
+            }
+            return matchedCells;
+        }
+
+        // Function to jump to a specific step
+        function jumpToStep(stepIndex) {
+            // Ngăn chặn nhiều lệnh gọi chồng chéo
+            if (isStepping) return;
+            isStepping = true;
+
+            if (!solutionOps.length) {
+                isStepping = false;
+                return;
+            }
+
+            // Ensure stepIndex is within bounds
+            stepIndex = Math.max(0, Math.min(stepIndex, solutionOps.length));
+
+            // Reset to original first
+            currentMatrix = originalMatrix.map(row => [...row]);
+            rotationCount = 0;
+
+            // Apply all ops up to the target step
+            for (let i = 0; i < stepIndex; i++) {
+                const op = solutionOps[i];
+                rotateSubMatrixOnMatrix(currentMatrix, op.x, op.y, op.n, 90);
+                rotationCount++;
+            }
+
+            currentOpIndex = stepIndex;
+
+            // Update selection area to the current step (if available)
+            // Cập nhật vùng chọn cho bước hiện tại
+            if (stepIndex < solutionOps.length) {
+                const op = solutionOps[stepIndex];
+                selectedArea = { x: op.x, y: op.y, width: op.n, height: op.n };
+
+                // Update UI inputs
+                const subX = document.getElementById('subX');
+                const subY = document.getElementById('subY');
+                const subWidth = document.getElementById('subWidth');
+                const subHeight = document.getElementById('subHeight');
+
+                if (subX) subX.value = op.x;
+                if (subY) subY.value = op.y;
+                if (subWidth) subWidth.value = op.n;
+                if (subHeight) subHeight.value = op.n;
+
+                renderSelectionSummary(selectedArea, `Bước ${stepIndex + 1} từ lời giải`, 'auto');
+
+                // Highlight BEFORE displayMatrix so it gets preserved
+                highlightSelectedArea();
+            } else {
+                // End of solution
+                clearSelectionHighlight();
+            }
+
+            displayMatrix();
+            updateStats();
+            renderOpsList();
+            applyColorCoding();
+
+            // Update timeline UI
+            updateTimelineUI(stepIndex);
+
+            // Update hidden slider value
+            const timelineSlider = document.getElementById('timelineSlider');
+            if (timelineSlider) {
+                timelineSlider.value = stepIndex;
+            }
+
+            if (stepIndex === solutionOps.length) {
+                showSuccess('Đã xem xong toàn bộ lời giải!');
+            } else {
+                showSuccess(`Đã nhảy đến bước ${stepIndex}/${solutionOps.length}`);
+            }
+
+            // Hoàn thành - cho phép các phím tiếp theo
+            isStepping = false;
+        }
+
+        // Helper function to rotate a submatrix on a given matrix (doesn't update UI)
+        function rotateSubMatrixOnMatrix(matrix, x, y, n, degrees) {
+            if (matrix.length === 0) return;
+
+            // Extract submatrix
+            const subMatrix = [];
+            for (let i = y; i < y + n; i++) {
+                const row = [];
+                for (let j = x; j < x + n; j++) {
+                    row.push(matrix[i][j]);
+                }
+                subMatrix.push(row);
+            }
+
+            // Rotate submatrix
+            const rotations = degrees / 90;
+            let rotatedSubMatrix = subMatrix;
+
+            for (let i = 0; i < rotations; i++) {
+                rotatedSubMatrix = rotate90Clockwise(rotatedSubMatrix);
+            }
+
+            // Apply back to main matrix
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    matrix[y + i][x + j] = rotatedSubMatrix[i][j];
+                }
+            }
+        }
+
+        // Update timeline info display
+        function updateTimelineInfo(stepIndex) {
+            const infoEl = document.getElementById('timelineInfo');
+            if (infoEl && solutionOps.length > 0) {
+                infoEl.textContent = `Bước: ${stepIndex} / ${solutionOps.length}`;
+            }
+        }
+    </script>
+</body>
+
+</html>
